@@ -1,6 +1,10 @@
+from datetime import datetime
+
+from module.base.decorator import cached_property
 from module.campaign.campaign_base import CampaignBase
 from module.campaign.run import CampaignRun
 from module.combat.assets import BATTLE_PREPARATION, OPTS_INFO_D
+from module.combat.emotion import Emotion, FleetEmotion
 from module.equipment.assets import *
 from module.equipment.fleet_equipment import FleetEquipment
 from module.exception import CampaignEnd, ScriptError
@@ -20,8 +24,79 @@ from module.ui.assets import BACK_ARROW, DAILY_CHECK
 from module.ui.page import page_fleet
 
 SIM_VALUE = 0.92
-GF_EMOTION_PER_ROUND = 10
-GF_RUN_COUNT = 150 // GF_EMOTION_PER_ROUND
+EMOTION_LIMIT = 10
+
+
+class GemsFleetEmotion(FleetEmotion):
+
+    @property
+    def limit(self):
+        return EMOTION_LIMIT
+
+    def update(self):
+        self.current = self.value
+        if self.current < 119:
+            super().update()
+
+    def get_recovered(self, expected_reduce=0):
+        recover_count = (self.limit + expected_reduce - self.current + 1) // 2
+        recovered = (int(datetime.now().timestamp()) // 360 + recover_count) * 360
+        return datetime.fromtimestamp(recovered)
+
+    def reset(self, emotion):
+        self.current = emotion
+        self.config.set_record(**{self.value_name: emotion})
+
+
+class GemsEmotion(Emotion):
+
+    def __init__(self, config, fleet_index):
+        self.config = config
+        self.fleet_index = fleet_index - 1
+        self.fleet_1 = GemsFleetEmotion(self.config, fleet=1)
+        self.fleet_2 = GemsFleetEmotion(self.config, fleet=2)
+        self.fleets = [self.fleet_1, self.fleet_2]
+
+    def update(self):
+        self.fleets[self.fleet_index].update()
+
+    def record(self):
+        fleet = self.fleets[self.fleet_index]
+        self.config.set_record(**{fleet.value_name: fleet.current})
+
+    def show(self):
+        fleet = self.fleets[self.fleet_index]
+        logger.attr(f'Emotion fleet_{fleet.fleet}', fleet.value)
+
+    def check_reduce(self, battle):
+        if not self.is_calculate:
+            return
+
+        emotion_reduce = battle * self.reduce_per_battle_before_entering
+        logger.info(f'Expect emotion reduce: {emotion_reduce}')
+        self.update()
+        self.record()
+        self.show()
+        recovered = self.fleets[self.fleet_index].get_recovered(emotion_reduce)
+        if recovered > datetime.now():
+            logger.hr('EMOTION CONTROL')
+            raise CampaignEnd('Emotion control')
+
+    def wait(self, fleet_index):
+        pass
+
+    def reduce(self, fleet_index):
+        logger.hr('Emotion reduce')
+        if fleet_index - 1 != self.fleet_index:
+            logger.warning('Fleet index does not match')
+
+        self.update()
+        self.fleets[self.fleet_index].current -= self.reduce_per_battle
+        self.record()
+        self.show()
+
+    def reset(self, emotion):
+        self.fleets[self.fleet_index].reset(emotion)
 
 
 class GemsCampaignOverride(CampaignBase):
@@ -70,6 +145,9 @@ class GemsCampaignOverride(CampaignBase):
 
     def handle_opts_info(self):
         if self.appear_then_click(OPTS_INFO_D, offset=(20, 20)):
+            self.emotion.fleet_1.current -= 10
+            self.emotion.fleet_2.current -= 10
+            self.emotion.record()
             self.device.screenshot_interval_set()
             while 1:
                 self.device.screenshot()
@@ -102,6 +180,13 @@ class GemsCampaignOverride(CampaignBase):
 
         return False
 
+    @cached_property
+    def emotion(self) -> GemsEmotion:
+        fleet_index = 1
+        if self.config.Fleet_FleetOrder == 'fleet1_standby_fleet2_all':
+            fleet_index = 2
+        return GemsEmotion(self.config, fleet_index)
+
 
 class GemsFarming(CampaignRun, FleetEquipment, Dock):
 
@@ -111,9 +196,12 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
         class GemsCampaign(GemsCampaignOverride, self.module.Campaign):
             pass
 
-        self.campaign = GemsCampaign(device=self.campaign.device, config=self.campaign.config)
-        self.campaign.config.override(Emotion_Mode='ignore')
+        self.campaign: GemsCampaign = GemsCampaign(device=self.campaign.device, config=self.campaign.config)
         self.campaign.config.override(EnemyPriority_EnemyScaleBalanceWeight='S1_enemy_first')
+        if self.change_flagship or self.change_vanguard:
+            self.campaign.config.override(Emotion_Mode='calculate')
+        else:
+            self.campaign.config.override(Emotion_Mode='ignore')
 
     @property
     def change_flagship(self):
@@ -211,6 +299,10 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
         self._dock_reset()
         self.dock_select_confirm(check_button=page_fleet.check_button)
 
+    @property
+    def emotion_lower_bound(self):
+        return 3 + EMOTION_LIMIT + self.campaign._map_battle * 2
+
     def get_common_rarity_cv(self):
         """
         Get a common rarity cv by config.GemsFarming_CommonCV
@@ -228,7 +320,7 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
 
         logger.hr('FINDING FLAGSHIP')
 
-        scanner = ShipScanner(level=(1, 31), emotion=(GF_EMOTION_PER_ROUND * 2, 150),
+        scanner = ShipScanner(level=(1, 31), emotion=(self.emotion_lower_bound, 150),
                               fleet=self.fleet_to_attack, status='free')
         scanner.disable('rarity')
 
@@ -274,7 +366,8 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
 
     def get_common_rarity_dd(self):
         """
-        Get a common rarity dd with level is 100 (70 for servers except CN) and emotion > 10
+        Get a common rarity dd with level is 100 (70 for servers except CN)
+        and emotion >= self.emotion_lower_bound
 
         _dock_reset() needs to be called later.
 
@@ -306,22 +399,17 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
         else:
             max_level = 70
 
-        scanner = ShipScanner(level=(max_level, max_level), emotion=(50, 150),
+        scanner = ShipScanner(level=(max_level, max_level), emotion=(self.emotion_lower_bound, 150),
                               fleet=self.fleet_to_attack, status='free')
         scanner.disable('rarity')
 
-        ships = scanner.scan(self.device.image)
-        if ships:
-            # Don't need to change current
-            return ships
-        elif not self.change_vanguard:
-            self.config.task_delay(minute=30)
-            self.config.task_stop()
+        if not self.change_vanguard:
+            return scanner.scan(self.device.image)
 
-        scanner.set_limitation(fleet=0)
+        scanner.set_limitation(fleet=[0, self.fleet_to_attack])
+
         if self.config.GemsFarming_CommonDD in ['any', 'favourite', 'z20_or_z21']:
-            # Change to any ship
-            return scanner.scan(self.device.image, output=False)
+            return scanner.scan(self.device.image)
 
         candidates = self.find_candidates(self.get_templates(self.config.GemsFarming_CommonDD), scanner)
         if candidates:
@@ -382,10 +470,7 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
         ships = self.get_common_rarity_cv()
         if ships:
             ship = min(ships, key=lambda s: (s.level, -s.emotion))
-            run_count = ship.emotion // GF_EMOTION_PER_ROUND
-            if run_count >= 9:
-                run_count += 1
-            self.config.StopCondition_RunCount = min(run_count, self.config.StopCondition_RunCount)
+            self._new_emotion_value = min(ship.emotion, self._new_emotion_value)
             self._ship_change_confirm(ship.button)
 
             logger.info('Change flagship success')
@@ -411,8 +496,7 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
         ships = self.get_common_rarity_dd()
         if ships:
             ship = max(ships, key=lambda s: s.emotion)
-            run_count = max((ship.emotion - 20) // GF_EMOTION_PER_ROUND, 1)
-            self.config.StopCondition_RunCount = min(run_count, self.config.StopCondition_RunCount)
+            self._new_emotion_value = min(ship.emotion, self._new_emotion_value)
             self._ship_change_confirm(ship.button)
 
             logger.info('Change vanguard ship success')
@@ -425,7 +509,6 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
 
     _trigger_lv32 = False
     _trigger_emotion = False
-    _trigger_count = False
 
     def triggered_stop_condition(self, oil_check=True):
         # Lv32 limit
@@ -437,11 +520,6 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
         if self.campaign.map_is_auto_search and self.campaign.config.GEMS_EMOTION_TRIGGRED:
             self._trigger_emotion = True
             logger.hr('TRIGGERED EMOTION LIMIT')
-            return True
-
-        if self.run_limit and self.config.StopCondition_RunCount <= 0:
-            self._trigger_count = True
-            logger.hr('Triggered stop condition: Run count')
             return True
 
         return super().triggered_stop_condition(oil_check=oil_check)
@@ -462,31 +540,32 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
             try:
                 super().run(name=name, folder=folder, total=total)
             except CampaignEnd as e:
-                if e.args[0] == 'Emotion withdraw':
+                if e.args[0] == 'Emotion withdraw' or e.args[0] == 'Emotion control':
                     self._trigger_emotion = True
                 else:
                     raise e
 
             # End
-            if self._trigger_lv32 or self._trigger_emotion or self._trigger_count:
-                self.config.StopCondition_RunCount = GF_RUN_COUNT
+            if self._trigger_lv32 or self._trigger_emotion:
+                self._new_emotion_value = 150
                 success = self.vanguard_change()
                 if self.change_flagship:
                     success = success and self.flagship_change()
+                if success:
+                    self.campaign.emotion.reset(self._new_emotion_value)
 
                 self._trigger_lv32 = False
                 self._trigger_emotion = False
-                self._trigger_count = False
                 self.campaign.config.LV32_TRIGGERED = False
                 self.campaign.config.GEMS_EMOTION_TRIGGRED = False
 
                 # Scheduler
-                if self.config.task_switched():
-                    self.campaign.ensure_auto_search_exit()
-                    self.config.task_stop()
-                elif not success:
+                if not success:
                     self.campaign.ensure_auto_search_exit()
                     self.config.task_delay(minute=30)
+                    self.config.task_stop()
+                elif self.config.task_switched():
+                    self.campaign.ensure_auto_search_exit()
                     self.config.task_stop()
 
                 continue
