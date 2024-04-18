@@ -6,6 +6,7 @@ from module.base.filter import Filter
 from module.base.timer import Timer
 from module.base.utils import *
 from module.combat.assets import GET_ITEMS_1
+from module.config.utils import get_server_weekday
 from module.exception import GameBugError
 from module.guild.assets import *
 from module.guild.base import GuildBase
@@ -276,7 +277,10 @@ class GuildLogistics(GuildBase):
         exchange_interval = Timer(1.5, count=3)
         click_interval = Timer(0.5, count=1)
         supply_checked = False
-        mission_checked = False
+        if get_server_weekday() < 5:
+            mission_checked = True
+        else:
+            mission_checked = False
         exchange_checked = False
         exchange_count = 0
 
