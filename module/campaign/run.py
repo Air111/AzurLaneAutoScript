@@ -318,7 +318,7 @@ class CampaignRun(CampaignEvent):
         Pages:
             in: page_campaign
         """
-        if self.campaign.commission_notice_show_at_campaign():
+        if self.campaign.commission_notice_show_at_campaign() and self.config.is_task_enabled('Commission'):
             logger.info('Commission notice found')
             self.config.task_call('Commission', force_call=True)
             self.config.task_stop('Commission notice found')
