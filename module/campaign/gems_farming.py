@@ -1,12 +1,12 @@
 from module.campaign.campaign_base import CampaignBase
 from module.campaign.run import CampaignRun
-from module.combat.assets import BATTLE_PREPARATION
+from module.combat.assets import BATTLE_PREPARATION, OPTS_INFO_D
 from module.equipment.assets import *
 from module.equipment.fleet_equipment import FleetEquipment
 from module.exception import CampaignEnd, ScriptError
 from module.handler.assets import AUTO_SEARCH_MAP_OPTION_OFF
 from module.logger import logger
-from module.map.assets import FLEET_PREPARATION, MAP_PREPARATION
+from module.map.assets import FLEET_PREPARATION, MAP_PREPARATION, WITHDRAW
 from module.retire.assets import (
     DOCK_CHECK,
     TEMPLATE_BOGUE, TEMPLATE_HERMES, TEMPLATE_LANGLEY, TEMPLATE_RANGER,
@@ -16,7 +16,7 @@ from module.retire.assets import (
 
 from module.retire.dock import Dock
 from module.retire.scanner import ShipScanner
-from module.ui.assets import BACK_ARROW
+from module.ui.assets import BACK_ARROW, DAILY_CHECK
 from module.ui.page import page_fleet
 
 SIM_VALUE = 0.92
@@ -65,6 +65,40 @@ class GemsCampaignOverride(CampaignBase):
                     self.enter_map_cancel()
                     break
             raise CampaignEnd('Emotion withdraw')
+
+    def handle_opts_info(self):
+        if self.appear_then_click(OPTS_INFO_D, offset=(20, 20)):
+            self.device.screenshot_interval_set()
+            while 1:
+                self.device.screenshot()
+                if self.handle_urgent_commission():
+                    continue
+                if self.handle_popup_confirm('WITHDRAW'):
+                    continue
+                if self.appear_then_click(WITHDRAW, interval=5):
+                    continue
+                # Accidental clicks
+                if self.appear(DAILY_CHECK, offset=(20, 20), interval=3):
+                    logger.info(f'{DAILY_CHECK} -> {BACK_ARROW}')
+                    self.device.click(BACK_ARROW)
+                    continue
+                if self.is_in_stage():
+                    break
+                if self.is_in_auto_search_menu() or self._handle_auto_search_menu_missing():
+                    break
+                if self.handle_story_skip():
+                    continue
+                if self.appear(FLEET_PREPARATION, offset=(20, 50), interval=2) \
+                        or self.appear(MAP_PREPARATION, offset=(20, 20), interval=2):
+                    self.enter_map_cancel()
+                    break
+                if self.appear(BATTLE_PREPARATION, offset=(20, 20), interval=2):
+                    self.device.click(BACK_ARROW)
+                    continue
+
+            raise CampaignEnd('Combat failed')
+
+        return False
 
 
 class GemsFarming(CampaignRun, FleetEquipment, Dock):

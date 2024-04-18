@@ -9,6 +9,7 @@ from module.combat.hp_balancer import HPBalancer
 from module.combat.level import Level
 from module.combat.submarine import SubmarineCall
 from module.combat_ui.assets import *
+from module.exception import GameStuckError
 from module.handler.auto_search import AutoSearchHandler
 from module.logger import logger
 from module.map.assets import MAP_OFFENSIVE
@@ -435,6 +436,14 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
             self.device.sleep((0.25, 0.5))
             return True
 
+        return False
+    
+    def handle_opts_info(self):
+        if self.appear(OPTS_INFO_D):
+            logger.warning('Combat failed')
+            self.device.stuck_record_clear()
+            raise GameStuckError('Combat failed')
+        
         return False
 
     def handle_get_ship(self, drop=None):
