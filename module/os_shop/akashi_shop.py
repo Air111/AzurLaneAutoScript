@@ -93,7 +93,7 @@ class AkashiShop(OSStatus, OSShopUI, Selector, MapEventHandler):
         self.os_shop_get_coins()
         items = self.os_shop_get_items_in_akashi()
         # Shop supplies do not appear immediately, need to confirm if shop is empty.
-        for _ in range(2):
+        for _ in range(3):
             if not len(items) or any(not item.is_known_item() for item in items):
                 logger.warning('Empty akashi shop or empty items, confirming')
                 self.device.sleep((0.3, 0.5))
@@ -106,5 +106,9 @@ class AkashiShop(OSStatus, OSShopUI, Selector, MapEventHandler):
                     return None
                 else:
                     return items.pop()
+        else:
+            logger.error('Empty akashi shop')
+            self.config.Scheduler_Enable = False
+            self.config.task_stop()
 
         return None
