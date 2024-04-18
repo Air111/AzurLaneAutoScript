@@ -651,6 +651,13 @@ class Map(Fleet):
         logger.warning('fleet_2_protect no siren approaching')
         return False
 
+    def get_filter_string(self, string):
+        if self.config.EnemyPriority_EnemyScaleBalanceWeight == 'S3_enemy_first':
+            string = '3L > 3M > 3E > 3C > 2L > 2M > 2E > 2C > 1L > 1M > 1E > 1C'
+        elif self.config.EnemyPriority_EnemyScaleBalanceWeight == 'S1_enemy_first':
+            string = '1L > 1M > 1E > 1C > 2L > 2M > 2E > 2C > 3L > 3M > 3E > 3C'
+        return string
+
     def clear_filter_enemy(self, string, preserve=0):
         """
         if EnemyPriority_EnemyScaleBalanceWeight != default_mode
@@ -664,11 +671,9 @@ class Map(Fleet):
         Returns:
             bool: If clear an enemy.
         """
+        string = self.get_filter_string(string)
         if self.config.EnemyPriority_EnemyScaleBalanceWeight == 'S3_enemy_first':
-            string = '3L > 3M > 3E > 3C > 2L > 2M > 2E > 2C > 1L > 1M > 1E > 1C'
             preserve = 0
-        elif self.config.EnemyPriority_EnemyScaleBalanceWeight == 'S1_enemy_first':
-            string = '1L > 1M > 1E > 1C > 2L > 2M > 2E > 2C > 3L > 3M > 3E > 3C'
 
         ENEMY_FILTER.load(string)
         grids = self.map.select(is_enemy=True, is_accessible=True)
