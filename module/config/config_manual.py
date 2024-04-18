@@ -12,21 +12,45 @@ class ManualConfig:
     Restart
     > OpsiCrossMonth
     > Commission > Tactical > Research
-    > Exercise
-    > Dorm > Meowfficer > Guild > Gacha
-    > Reward
+    > Dorm > Meowfficer > Gacha
     > ShopFrequent > ShopOnce > Shipyard > Freebies
     > OpsiExplore
-    > Minigame > Awaken
-    > OpsiAshBeacon
-    > OpsiDaily > OpsiShop > OpsiVoucher
-    > OpsiAbyssal > OpsiStronghold > OpsiObscure > OpsiArchive
-    > Daily > Hard > OpsiAshBeacon > OpsiAshAssist > OpsiMonthBoss
+    > OpsiDaily > OpsiAshBeacon 
+    > Exercise > Reward
+    > Guild
+    > Daily > Hard > Minigame > Awaken
     > Sos > EventSp > EventA > EventB > EventC > EventD
     > RaidDaily > CoalitionSp > WarArchives > MaritimeEscort
-    > Event > Event2 > Raid > Hospital > Coalition > Main > Main2 > Main3
+    > OpsiShop > OpsiVoucher
+    > OpsiAbyssal > OpsiStronghold > OpsiObscure > OpsiArchive
+    > OpsiAshAssist > OpsiMonthBoss
+    > Main > Main2 > Main3
+    > Event > Event2 > Raid > Hospital > Coalition
     > OpsiMeowfficerFarming
     > GemsFarming
+    > OpsiHazard1Leveling
+    """
+
+    SCHEDULER_PRIORITY_GEMS = """
+    Restart
+    > OpsiCrossMonth
+    > Commission > Tactical > Research
+    > Dorm > Meowfficer > Gacha
+    > ShopFrequent > ShopOnce > Shipyard > Freebies
+    > OpsiExplore
+    > OpsiDaily > OpsiAshBeacon 
+    > Exercise > Reward
+    > Guild
+    > Daily > Hard > Minigame > Awaken
+    > Sos > EventSp > EventA > EventB > EventC > EventD
+    > RaidDaily > CoalitionSp > WarArchives > MaritimeEscort
+    > OpsiShop > OpsiVoucher
+    > OpsiAbyssal > OpsiStronghold > OpsiObscure > OpsiArchive
+    > OpsiAshAssist > OpsiMonthBoss
+    > GemsFarming
+    > Main > Main2 > Main3
+    > Event > Event2 > Raid > Hospital > Coalition
+    > OpsiMeowfficerFarming
     > OpsiHazard1Leveling
     """
 
