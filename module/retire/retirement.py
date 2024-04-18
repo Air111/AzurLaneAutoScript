@@ -1,6 +1,6 @@
 from module.base.button import ButtonGrid
 from module.base.timer import Timer
-from module.base.utils import color_similar, get_color, resize
+from module.base.utils import color_similar, get_color, resize, area_in_area
 from module.combat.assets import GET_ITEMS_1
 from module.exception import RequestHumanTakeover, ScriptError
 from module.handler.assets import AUTO_SEARCH_MAP_OPTION_OFF, AUTO_SEARCH_MAP_OPTION_ON
@@ -168,48 +168,106 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
             rarity.add('SSR')
         return rarity
 
+    def retire_click_one_click(self, skip_first_screenshot=True):
+        click_count = 0
+        end = False
+        failed = False
+        while 1:
+            if skip_first_screenshot:
+                skip_first_screenshot = False
+            else:
+                self.device.screenshot()
+            # End
+            if self.appear(SHIP_CONFIRM_2, offset=(30, 30)):
+                break
+            if self.info_bar_count():
+                logger.info('No more ships to retire.')
+                end = True
+                break
+
+            # Click
+            if click_count >= 7:
+                logger.warning('Failed to select ships using ONE_CLICK_RETIREMENT after 7 trial, '
+                               'probably because game bugged, a re-enter should fix it')
+                # Mark as retire finished, higher level will call retires
+                end = True
+                failed = True
+                break
+            elif self.appear_then_click(ONE_CLICK_RETIREMENT, offset=(20, 20), interval=2):
+                click_count += 1
+                continue
+        return end, failed
+
+    def gems_farming_retire_ships_one_click(self):
+        logger.info('Using GemsFarming one click retirement')
+        total = 0
+
+        self.dock_filter_set(index='cv', rarity='common', extra='not_level_max', sort='level', wait_loading=False)
+        _, failed = self.retire_click_one_click()
+        self.handle_info_bar()
+        if failed:
+            total = 10
+            logger.info(f'Total retired round: {total // 10}')
+            self.dock_filter_set()
+            return total
+
+        skip_first_screenshot = True
+        while 1:
+            if skip_first_screenshot:
+                skip_first_screenshot = False
+            else:
+                self.device.screenshot()
+
+            if self.appear_then_click(SHIP_CANCEL_2, interval=1):
+                continue
+
+            if self.appear(IN_RETIREMENT_CHECK):
+                break
+
+        self.dock_sort_method_dsc_set()
+
+        scanner = ShipScanner(
+            rarity='common', fleet=0, status='free', level=(20, 40))
+        scanner.disable('emotion')
+        ships = scanner.scan(self.device.image)
+        if ships:
+            for ship in ships[:10]:
+                self.device.click(ship.button)
+                self.device.sleep((0.1, 0.15))
+                total += 1
+
+        self.dock_filter_set(wait_loading=False)
+        end, failed = self.retire_click_one_click()
+        if end:
+            if failed:
+                total = 10
+            logger.info(f'Total retired round: {total // 10}')
+            return total
+
+        self._retirement_confirm()
+        if total < 10:
+            total = 10
+        logger.info(f'Total retired round: {total // 10}')
+        return total
+
     def retire_ships_one_click(self):
         logger.hr('Retirement')
         logger.info('Using one click retirement.')
         # No need to wait, one-click-retire doesn't need to check dock
         self.dock_favourite_set(wait_loading=False)
         self.dock_sort_method_dsc_set(wait_loading=False)
-        end = False
-        total = 0
 
         if self.retire_keep_common_cv:
             self._have_kept_cv = False
+            return self.gems_farming_retire_ships_one_click()
+        total = 0
 
         while 1:
             self.handle_info_bar()
 
-            # ONE_CLICK_RETIREMENT -> SHIP_CONFIRM_2 or info_bar_count
-            skip_first_screenshot = True
-            click_count = 0
-            while 1:
-                if skip_first_screenshot:
-                    skip_first_screenshot = False
-                else:
-                    self.device.screenshot()
-                # End
-                if self.appear(SHIP_CONFIRM_2, offset=(30, 30)):
-                    break
-                if self.info_bar_count():
-                    logger.info('No more ships to retire.')
-                    end = True
-                    break
-
-                # Click
-                if click_count >= 7:
-                    logger.warning('Failed to select ships using ONE_CLICK_RETIREMENT after 7 trial, '
-                                   'probably because game bugged, a re-enter should fix it')
-                    # Mark as retire finished, higher level will call retires
-                    end = True
-                    total = 10
-                    break
-                elif self.appear_then_click(ONE_CLICK_RETIREMENT, offset=(20, 20), interval=2):
-                    click_count += 1
-                    continue
+            end, failed = self.retire_click_one_click()
+            if failed:
+                total = 10
 
             # info_bar_count
             if end:
@@ -302,7 +360,7 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
         self.dock_filter_set(index='cv', rarity='common', extra='not_level_max', sort='level')
 
         scanner = ShipScanner(
-            rarity='common', fleet=0, status='free', level=(2, 100))
+            rarity='common', fleet=0, status='free', level=(20, 40))
         scanner.disable('emotion')
 
         total = 0
@@ -321,13 +379,6 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
             if not ships:
                 # exit if nothing can be retired
                 break
-            if keep_one:
-                if len(ships) < 2:
-                    break
-                else:
-                    # Try to keep the one with the lowest level
-                    ships.sort(key=lambda s: -s.level)
-                    ships = ships[:-1]
 
             for ship in ships:
                 self.device.click(ship.button)
@@ -435,7 +486,6 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
                     logger.warning('No ship retired, trying to reset quick retire settings to "all"')
                     self.quick_retire_setting_set('all')
                     total = self.retire_ships_one_click()
-            total += self.retire_gems_farming_flagships(keep_one=total > 0)
             if not total:
                 logger.critical('No ship retired')
                 logger.critical('Please configure your "Quick Retire Options" in game, '
@@ -494,28 +544,23 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
             Button:
         """
         if self.config.GemsFarming_CommonCV == 'any':
-            for common_cv_name in ['BOGUE', 'HERMES', 'LANGLEY', 'RANGER']:
-                template = globals()[f'TEMPLATE_{common_cv_name}']
-                sim, button = template.match_result(
-                    resize(self.device.image, size=(1189, 669)))
-
-                if sim > self.config.COMMON_CV_THRESHOLD:
-                    return Button(button=tuple(_ * 155 // 144 for _ in button.button), area=button.area,
-                                  color=button.color,
-                                  name=f'TEMPLATE_{common_cv_name}_RETIRE')
-
-            return None
+            common_cv_names = ['BOGUE', 'HERMES', 'LANGLEY', 'RANGER']
         else:
+            common_cv_names = [self.config.GemsFarming_CommonCV.upper()]
 
-            template = globals()[
-                f'TEMPLATE_{self.config.GemsFarming_CommonCV.upper()}']
-            sim, button = template.match_result(
-                resize(self.device.image, size=(1189, 669)))
-
-            if sim > self.config.COMMON_CV_THRESHOLD:
-                return Button(button=tuple(_ * 155 // 144 for _ in button.button), area=button.area, color=button.color,
-                              name=f'TEMPLATE_{self.config.GemsFarming_CommonCV.upper()}_RETIRE')
-
+        buttons = []
+        for name in common_cv_names:
+            template = globals()[f'TEMPLATE_{name}']
+            buttons.extend(template.match_multi(
+                self.device.image,
+                scaling=1.09,
+                name=f'TEMPLATE_{name}_RETIRE'))
+        if buttons:
+            first_line = [b for b in buttons if area_in_area(b.area, (205, 121, 1074, 337))]
+            if first_line:
+                return min(first_line, key=lambda b: b.area[0])
+            return min(buttons, key=lambda b: b.area[0])
+        else:
             return None
 
     def keep_one_common_cv(self):
