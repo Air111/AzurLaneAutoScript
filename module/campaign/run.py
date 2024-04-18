@@ -77,11 +77,6 @@ class CampaignRun(CampaignEvent):
             logger.hr('Triggered stop condition: Run count')
             self.config.StopCondition_RunCount = 0
             self.config.Scheduler_Enable = False
-            handle_notify(
-                self.config.Error_OnePushConfig,
-                title=f"Alas <{self.config.config_name}> campaign finished",
-                content=f"<{self.config.config_name}> {self.name} reached run count limit"
-            )
             return True
         # Lv120 limit
         if self.config.StopCondition_ReachLevel and self.campaign.config.LV_TRIGGERED:
