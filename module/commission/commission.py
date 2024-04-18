@@ -588,7 +588,12 @@ class RewardCommission(UI, InfoHandler):
                 logger.info('Having daily commissions to do, delay task `GemsFarming`')
                 self.config.task_delay(
                     minute=120, target=future_finish if len(future_finish) else None, task='GemsFarming')
-            elif filtered_urgent >= 4:
+            elif filtered_urgent >= 5:
                 logger.info('Having too many urgent commissions, delay task `GemsFarming`')
                 self.config.task_delay(
                     minute=120, target=future_finish if len(future_finish) else None, task='GemsFarming')
+
+            limit = self.config.Scheduler_NextRun - timedelta(hours=1)
+            next_run = self.config.cross_get(keys="GemsFarming.Scheduler.NextRun", default=None)
+            if isinstance(next_run, datetime) and next_run < limit:
+                self.config.cross_set(keys="GemsFarming.Scheduler.NextRun", value=limit)
