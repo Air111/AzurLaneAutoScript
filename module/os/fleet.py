@@ -283,6 +283,8 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
             confirm_timer = Timer(0.8, count=2)
         result = set()
 
+        story_skip_limit = 20
+
         confirm_timer.reset()
         while 1:
             if skip_first_screenshot:
@@ -294,6 +296,14 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
             if self.handle_map_event(drop=drop):
                 confirm_timer.reset()
                 result.add('event')
+                while story_skip_limit:
+                    if not len(self.device.click_record):
+                        break
+                    if self.device.click_record[-1] in ['STORY_OPTION_2_OF_3', 'POPUP_CONFIRM_STORY_SKIP']:
+                        self.device.click_record.pop()
+                        story_skip_limit -= 1
+                    else:
+                        break
                 continue
             if self.handle_retirement():
                 confirm_timer.reset()
