@@ -220,7 +220,12 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
                 waiting.append(func)
 
         f = Filter(regex=r"(.*)", attr=["command"])
-        f.load(self.SCHEDULER_PRIORITY)
+        gfcv = self.cross_get(keys='GemsFarming.GemsFarming.ChangeVanguard', default='ship') != 'disabled'
+        gfcl = self.cross_get(keys='GemsFarming.GemsFarming.CommissionLimit', default=False)
+        if gfcl or not gfcv:
+            f.load(self.SCHEDULER_PRIORITY_GEMS)
+        else:
+            f.load(self.SCHEDULER_PRIORITY)
         if pending:
             pending = f.apply(pending)
         if waiting:
