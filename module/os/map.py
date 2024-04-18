@@ -228,7 +228,7 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
         Returns:
             bool: If repaired.
         """
-        if self.config.OpsiGeneral_RepairThreshold < 0:
+        if self.config.OpsiGeneral_RepairThreshold <= 0:
             return False
         if self.is_in_special_zone():
             logger.info('OS is in a special zone type, skip fleet repair')
