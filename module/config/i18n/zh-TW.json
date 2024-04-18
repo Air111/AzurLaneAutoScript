@@ -2291,7 +2291,8 @@
       "name": "META作戰",
       "help": "",
       "current": "當期",
-      "current_dossier": "當期 + 檔案"
+      "current_dossier": "當期 + 檔案",
+      "dossier": "dossier"
     },
     "OneHitMode": {
       "name": "一擊即走",

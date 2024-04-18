@@ -2291,7 +2291,8 @@
       "name": "OpsiAshBeacon.AttackMode.name",
       "help": "OpsiAshBeacon.AttackMode.help",
       "current": "current",
-      "current_dossier": "current_dossier"
+      "current_dossier": "current_dossier",
+      "dossier": "dossier"
     },
     "OneHitMode": {
       "name": "OpsiAshBeacon.OneHitMode.name",

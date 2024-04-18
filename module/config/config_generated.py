@@ -378,7 +378,7 @@ class GeneratedConfig:
     OpsiGeneral_AkashiShopFilter = 'ActionPoint > PurpleCoins'
 
     # Group `OpsiAshBeacon`
-    OpsiAshBeacon_AttackMode = 'current'  # current, current_dossier
+    OpsiAshBeacon_AttackMode = 'current'  # current, current_dossier, dossier
     OpsiAshBeacon_OneHitMode = True
     OpsiAshBeacon_DossierAutoAttackMode = False
     OpsiAshBeacon_RequestAssist = True
