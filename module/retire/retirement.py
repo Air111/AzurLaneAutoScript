@@ -284,7 +284,7 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
         self.dock_favourite_set(False)
 
         scanner = ShipScanner(
-            rarity='common', fleet=0, status='free', level=(2, 100))
+            rarity='common', fleet=0, status='free', level=(20, 36))
         scanner.disable('emotion')
 
         total = 0
@@ -302,13 +302,6 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
             if not ships:
                 # exit if nothing can be retired
                 break
-            if keep_one:
-                if len(ships) < 2:
-                    break
-                else:
-                    # Try to keep the one with the lowest level
-                    ships.sort(key=lambda ship: -ship.level)
-                    ships = ships[:-1]
 
             for ship in ships[:10]:
                 self.device.click(ship.button)
