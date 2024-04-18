@@ -2484,6 +2484,10 @@
       "0": "0",
       "44": "44",
       "22": "22"
+    },
+    "SolveScanningDevice": {
+      "name": "OpsiHazard1Leveling.SolveScanningDevice.name",
+      "help": "OpsiHazard1Leveling.SolveScanningDevice.help"
     }
   },
   "Daemon": {

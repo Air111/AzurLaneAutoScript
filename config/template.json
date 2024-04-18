@@ -1870,7 +1870,8 @@
       "ServerUpdate": "00:00, 12:00"
     },
     "OpsiHazard1Leveling": {
-      "TargetZone": 0
+      "TargetZone": 0,
+      "SolveScanningDevice": false
     },
     "OpsiFleet": {
       "Fleet": 1,

@@ -2484,6 +2484,10 @@
       "0": "No Specification",
       "44": "44 | West Continental Shelf D",
       "22": "22 | NA Ocean SW Sector B"
+    },
+    "SolveScanningDevice": {
+      "name": "OpsiHazard1Leveling.SolveScanningDevice.name",
+      "help": "OpsiHazard1Leveling.SolveScanningDevice.help"
     }
   },
   "Daemon": {
