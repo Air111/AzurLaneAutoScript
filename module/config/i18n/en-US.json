@@ -2215,7 +2215,8 @@
       "name": "META Attack",
       "help": "",
       "current": "Current",
-      "current_dossier": "Current + Dossier"
+      "current_dossier": "Current + Dossier",
+      "dossier": "dossier"
     },
     "OneHitMode": {
       "name": "One Hit Mode",

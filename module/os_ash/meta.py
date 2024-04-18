@@ -67,7 +67,7 @@ class Meta(UI, MapEventHandler):
 
 
 def _server_support():
-    return server.server in ['cn', 'en', 'jp','tw']
+    return server.server in ['cn', 'en', 'jp', 'tw']
 
 
 def _server_support_dossier_auto_attack():
@@ -360,13 +360,13 @@ class OpsiAshBeacon(Meta):
         # Page meta main
         if self.appear(ASH_SHOWDOWN, offset=(30, 30), interval=2):
             # Beacon
-            if self._check_beacon_point():
+            if self._check_beacon_point() and self.config.OpsiAshBeacon_AttackMode != 'dossier':
                 self.device.click(META_MAIN_BEACON_ENTRANCE)
                 logger.info('Select beacon entrance into')
                 return True
             # Dossier
             if _server_support() \
-                    and self.config.OpsiAshBeacon_AttackMode == 'current_dossier' \
+                    and self.config.OpsiAshBeacon_AttackMode != 'current' \
                     and self._check_dossier_point():
                 if self.appear_then_click(META_MAIN_DOSSIER_ENTRANCE, offset=(20, 20), interval=2):
                     logger.info('Select dossier entrance into')
@@ -376,14 +376,17 @@ class OpsiAshBeacon(Meta):
             return False
         # Page beacon
         elif self.appear(BEACON_LIST, offset=(20, 20), interval=2):
-            if self._check_beacon_point():
+            if self.config.OpsiAshBeacon_AttackMode != 'dossier' \
+                    and self._check_beacon_point():
                 self.device.click(META_BEGIN_ENTRANCE)
                 logger.info('Begin a beacon')
+            else:
+                self.appear_then_click(ASH_QUIT, offset=(10, 10), interval=2)
             return True
         # Page dossier
         elif _server_support() \
                 and self.appear(DOSSIER_LIST, offset=(20, 20), interval=2):
-            if self.config.OpsiAshBeacon_AttackMode == 'current_dossier' \
+            if self.config.OpsiAshBeacon_AttackMode != 'current' \
                     and self._check_dossier_point():
                 if self.appear_then_click(META_BEGIN_ENTRANCE, offset=(20, 20), interval=2):
                     logger.info('Begin a dossier')
@@ -454,7 +457,7 @@ class OpsiAshBeacon(Meta):
                 skip_first_screenshot = False
             else:
                 self.device.screenshot()
-            
+
             if self.appear(DOSSIER_LIST, offset=(20, 20)):
                 logger.info('In dossier page')
                 return True
