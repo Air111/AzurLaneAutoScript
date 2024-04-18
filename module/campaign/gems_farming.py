@@ -316,6 +316,9 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
         if ships:
             # Don't need to change current
             return ships
+        elif not self.change_vanguard:
+            self.config.task_delay(minute=30)
+            self.config.task_stop()
 
         scanner.set_limitation(fleet=0)
         if self.config.GemsFarming_CommonDD in ['any', 'favourite', 'z20_or_z21']:
@@ -468,12 +471,10 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
 
             # End
             if self._trigger_lv32 or self._trigger_emotion or self._trigger_count:
-                success = True
                 self.config.StopCondition_RunCount = GF_RUN_COUNT
+                success = self.vanguard_change()
                 if self.change_flagship:
-                    success = self.flagship_change()
-                if self.change_vanguard:
-                    success = success and self.vanguard_change()
+                    success = success and self.flagship_change()
 
                 self._trigger_lv32 = False
                 self._trigger_emotion = False
