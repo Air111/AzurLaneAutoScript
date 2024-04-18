@@ -90,6 +90,13 @@ class AzurLaneAutoScript:
             self.config.task_call('Restart')
             self.device.sleep(10)
             return False
+        except MapDetectionError as e:
+            logger.exception(e)
+            self.save_error_log()
+            logger.warning(f'Restarting {self.device.package} to try')
+            self.config.task_call('Restart')
+            self.device.sleep(10)
+            return False
         except GamePageUnknownError:
             logger.info('Game server may be under maintenance or network may be broken, check server status now')
             self.checker.check_now()
