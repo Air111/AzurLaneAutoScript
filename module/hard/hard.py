@@ -51,4 +51,5 @@ class CampaignHard(CampaignRun):
 
         # Scheduler
         self.config.task_delay(server_update=True)
-        self.config.task_call('Reward')
+        if self.config.is_task_enabled('Reward'):
+            self.config.task_call('Reward')
