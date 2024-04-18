@@ -74,6 +74,13 @@ class Config(ConfigBase):
 class Campaign(CampaignBase):
     MAP = MAP
 
+    def get_filter_string(self, string):
+        if self.config.EnemyPriority_EnemyScaleBalanceWeight == 'S3_enemy_first':
+            string = '3L > 3M > 3E > 3C > 2L > 2M > 2E > 2C > 1L > 1M > 1E > 1C'
+        elif self.config.EnemyPriority_EnemyScaleBalanceWeight == 'S1_enemy_first':
+            string = '1T > 1L > 1M > 1E > 1C > 2T > 2L > 2M > 2E > 2C > 3L > 3E > 3C > 3M > 3T'
+        return string
+
     def battle_0(self):
         if self.clear_filter_enemy('1L > 1M > 2L > 2M > 3L > 2E > 3E > 2C > 3C > 3M', preserve=0):
             return True
