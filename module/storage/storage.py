@@ -348,6 +348,14 @@ class StorageHandler(StorageUI):
         # self.equipping_set()
         # Also no need to call _wait_until_storage_stable(), filter confirm will do that
         disassembled = 0
+        campaign_enabled = (
+            self.config.cross_get(keys='GemsFarming.Scheduler.Enable', default=False) or
+            self.config.cross_get(keys='Main.Scheduler.Enable', default=False) or
+            self.config.cross_get(keys='Event.Scheduler.Enable', default=False) or
+            self.config.cross_get(keys='Main2.Scheduler.Enable', default=False) or
+            self.config.cross_get(keys='Main3.Scheduler.Enable', default=False) or
+            self.config.cross_get(keys='Event2.Scheduler.Enable', default=False)
+        )
         while 1:
             logger.attr('Total_Disassemble', f'{disassembled}/{amount}')
             if disassembled >= amount:
@@ -357,6 +365,9 @@ class StorageHandler(StorageUI):
             self._storage_enter_disassemble()
             equip = self._storage_disassemble_equipment_execute(rarity=rarity, amount=amount)
             disassembled += equip
+            if campaign_enabled:
+                logger.info('Do not have to use boxes, disassemble equipment end')
+                break
             if equip <= 0:
                 logger.info('No more equipment to disassemble, going to use boxes')
                 boxes = 0
