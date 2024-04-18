@@ -596,16 +596,33 @@ class RewardCommission(UI, InfoHandler):
             logger.info('No commission running')
             self.config.task_delay(success=False)
 
+        next_run = self.config.Scheduler_NextRun
+        restart_next_run = self.config.cross_get(keys="Restart.Scheduler.NextRun", default=None)
+        if isinstance(restart_next_run, datetime) and restart_next_run <= next_run:
+            self.config.cross_set(keys="GemsFarming.Scheduler.NextRun", value=next_run)
+
         # Delay GemsFarming
         if self.config.cross_get(keys='GemsFarming.GemsFarming.CommissionLimit', default=False):
+            time_now = datetime.now()
+            # if self.config.cross_get(keys='OpsiHazard1Leveling.Scheduler.NextRun', default=time_now) >= time_now:
+            #     logger.warning("CL1 failed")
+            #     return
+            gf_next_run = self.config.cross_get(keys="GemsFarming.Scheduler.NextRun", default=None)
+            if isinstance(gf_next_run, datetime) and gf_next_run >= next_run:
+                return
+
             daily = self.daily.select(category_str='daily', status='pending').count
             filtered_urgent = self.comm_choose.intersect_by_eq(self.urgent.select(status='pending')).count
             logger.info(f'Daily commission: {daily}, filtered_urgent: {filtered_urgent}')
-            if daily > 0 and filtered_urgent >= 1:
+            if daily > 0 and filtered_urgent >= 5:
                 logger.info('Having daily commissions to do, delay task `GemsFarming`')
                 self.config.task_delay(
                     minute=120, target=future_finish if len(future_finish) else None, task='GemsFarming')
-            elif filtered_urgent >= 4:
+            elif filtered_urgent >= 10:
                 logger.info('Having too many urgent commissions, delay task `GemsFarming`')
                 self.config.task_delay(
                     minute=120, target=future_finish if len(future_finish) else None, task='GemsFarming')
+
+            limit = next_run - timedelta(hours=2)
+            if time_now < limit and isinstance(gf_next_run, datetime) and gf_next_run < limit:
+                self.config.cross_set(keys="GemsFarming.Scheduler.NextRun", value=limit)
