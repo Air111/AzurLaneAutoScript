@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from typing import Union
 
 import numpy as np
@@ -9,6 +11,7 @@ from uiautomator2.xpath import XPath, XPathSelector
 import module.config.server as server
 from module.base.timer import Timer
 from module.base.utils import color_similarity_2d, crop, random_rectangle_point
+from module.config.utils import get_server_next_update
 from module.exception import (GameStuckError, GameTooManyClickError,
                               RequestHumanTakeover)
 from module.handler.assets import *
@@ -155,6 +158,18 @@ class LoginHandler(UI):
     def app_restart(self):
         logger.hr('App restart')
         self.device.app_stop()
+        now = datetime.now().replace(microsecond=0)
+        if get_server_next_update('23:50').time() < now.time():
+            logger.hr('Wait until server reset', level=1)
+            next_reset = get_server_next_update('00:01')
+            next_reset = max(next_reset, now + timedelta(minutes=10))
+            while True:
+                now = datetime.now()
+                remain = (next_reset - now).total_seconds()
+                if remain <= 0:
+                    break
+                logger.info(f'Wait until {next_reset}')
+                self.device.sleep(remain)
         self.device.app_start()
         self.handle_app_login()
         # self.ensure_no_unfinished_campaign()

@@ -71,7 +71,7 @@
       "Command": "Restart",
       "SuccessInterval": 0,
       "FailureInterval": 0,
-      "ServerUpdate": "00:00"
+      "ServerUpdate": "23:50, 04:00"
     },
     "Storage": {
       "Storage": {}
