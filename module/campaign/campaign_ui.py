@@ -83,19 +83,24 @@ class CampaignUI(MapOperation, CampaignEvent, CampaignOcr):
             logger.attr("Index", current)
             diff = index - current
             if diff == 0:
-                break
-
-            # Getting 3-7 when looking for D3
-            if not (isdigit == current_isdigit):
-                continue
-
+                # index=4, current=4, actual=14
+                error_confirm.start()
+                if not error_confirm.reached():
+                    continue
+                else:
+                    break
             # 14-4 may be OCR as 4-1 due to slow animation, confirm if it is 4-1
-            if index >= 11 and index % 10 == current:
+            # index=14, current=4, actual=14
+            elif index >= 11 and index % 10 == current:
                 error_confirm.start()
                 if not error_confirm.reached():
                     continue
             else:
-                error_confirm.reset()
+                error_confirm.clear()
+
+            # Getting 3-7 when looking for D3
+            if not (isdigit == current_isdigit):
+                continue
 
             # Switch
             if retry.reached():
