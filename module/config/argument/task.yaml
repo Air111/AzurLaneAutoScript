@@ -73,6 +73,7 @@ Event:
     EventGeneral:
       - EventGeneral
       - TaskBalancer
+      - CampaignStorage
     Event:
       - Scheduler
       - Campaign
@@ -249,6 +250,7 @@ DailyMission:
     Gacha:
       - Scheduler
       - Gacha
+      - GachaStorage
     Freebies:
       - Scheduler
       - BattlePass
@@ -266,6 +268,7 @@ Opsi:
   tasks:
     OpsiGeneral:
       - OpsiGeneral
+      - OpsiStorage
     OpsiAshBeacon:
       - Scheduler
       - OpsiAshBeacon
