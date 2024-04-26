@@ -2,10 +2,12 @@ from module.base.timer import Timer
 from module.campaign.campaign_status import CampaignStatus
 from module.combat.assets import *
 from module.combat.combat import Combat
-from module.exception import CampaignEnd
+from module.exception import CampaignEnd, CombatFail
 from module.handler.assets import AUTO_SEARCH_MAP_OPTION_ON
 from module.logger import logger
+from module.map.assets import WITHDRAW, MAP_PREPARATION, FLEET_PREPARATION
 from module.map.map_operation import MapOperation
+from module.ui.assets import DAILY_CHECK, BACK_ARROW
 
 
 class AutoSearchCombat(MapOperation, Combat, CampaignStatus):
@@ -29,6 +31,43 @@ class AutoSearchCombat(MapOperation, Combat, CampaignStatus):
                 return True
         else:
             self._auto_search_in_stage_timer.reset()
+
+        return False
+
+    def handle_opts_info(self):
+        if self.appear_then_click(OPTS_INFO_D, offset=(20, 20)):
+            self.emotion.reduce(1, 10)
+            self.emotion.reduce(2, 10)
+            self.device.screenshot_interval_set()
+            while 1:
+                self.device.screenshot()
+                if self.handle_urgent_commission():
+                    continue
+                if self.handle_popup_confirm('WITHDRAW'):
+                    continue
+                if self.appear_then_click(WITHDRAW, interval=5):
+                    continue
+                # Accidental clicks
+                if self.appear(DAILY_CHECK, offset=(20, 20), interval=3):
+                    logger.info(f'{DAILY_CHECK} -> {BACK_ARROW}')
+                    self.device.click(BACK_ARROW)
+                    continue
+                if self.is_in_stage():
+                    break
+                if self.is_in_auto_search_menu() or self._handle_auto_search_menu_missing():
+                    break
+                if self.handle_story_skip():
+                    continue
+                if self.appear(FLEET_PREPARATION, offset=(20, 50), interval=2) \
+                        or self.appear(MAP_PREPARATION, offset=(20, 20), interval=2):
+                    self.enter_map_cancel()
+                    break
+                if self.appear(BATTLE_PREPARATION, offset=(20, 20), interval=2):
+                    self.device.click(BACK_ARROW)
+                    continue
+
+            self.ui_goto_main()
+            raise CombatFail
 
         return False
 

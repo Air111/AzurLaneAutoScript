@@ -6,6 +6,10 @@ class OilExhausted(Exception):
     pass
 
 
+class CombatFail(Exception):
+    pass
+
+
 class MapDetectionError(Exception):
     pass
 

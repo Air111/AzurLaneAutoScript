@@ -3,11 +3,12 @@ import importlib
 import os
 import random
 
+from alas import AzurLaneAutoScript
 from module.campaign.campaign_base import CampaignBase
 from module.campaign.campaign_event import CampaignEvent
 from module.campaign.campaign_ui import MODE_SWITCH_1
 from module.config.config import AzurLaneConfig
-from module.exception import CampaignEnd, RequestHumanTakeover, ScriptEnd
+from module.exception import CampaignEnd, RequestHumanTakeover, ScriptEnd, CombatFail
 from module.handler.fast_forward import map_files, to_map_file_name
 from module.logger import logger
 from module.notify import handle_notify
@@ -331,6 +332,7 @@ class CampaignRun(CampaignEvent):
         self.load_campaign(name, folder=folder)
         self.run_count = 0
         self.run_limit = self.config.StopCondition_RunCount
+        fail_count = 0
         while 1:
             # End
             if total and self.run_count >= total:
@@ -392,6 +394,17 @@ class CampaignRun(CampaignEvent):
                 logger.hr('Script end')
                 logger.info(str(e))
                 break
+            except CombatFail:
+                logger.hr('Combat fail')
+                fail_count += 1
+                if fail_count >= 3:
+                    logger.error('Combat fail for successive 3 times')
+                    AzurLaneAutoScript.save_error_log(self)
+                    self.device.screenshot()
+                    self.config.Scheduler_Enable = False
+                    self.config.task_stop()
+            else:
+                fail_count = 0
 
             # After run
             self.run_count += 1
