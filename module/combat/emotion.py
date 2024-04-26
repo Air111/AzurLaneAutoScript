@@ -266,7 +266,7 @@ class Emotion:
                 logger.attr('Wait until', recovered)
                 sleep(60)
 
-    def reduce(self, fleet_index):
+    def reduce(self, fleet_index, value=None):
         """
         Reduce emotion of specific fleet.
         Should be called after battle executing.
@@ -279,8 +279,11 @@ class Emotion:
         self.update()
 
         fleet = self.fleets[fleet_index - 1]
-        fleet.current -= self.reduce_per_battle
-        self.total_reduced += self.reduce_per_battle
+        if value is None:
+            value = self.reduce_per_battle
+        fleet.current -= value
+        fleet.current = max(fleet.current, 0)
+        self.total_reduced += value
         self.record()
         self.show()
 

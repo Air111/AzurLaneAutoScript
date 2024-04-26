@@ -2,6 +2,10 @@ class CampaignEnd(Exception):
     pass
 
 
+class CombatFail(Exception):
+    pass
+
+
 class MapDetectionError(Exception):
     pass
 
