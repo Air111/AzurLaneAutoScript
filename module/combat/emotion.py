@@ -239,7 +239,7 @@ class Emotion:
         recovered = max([f.get_recovered(b) for f, b in zip(self.fleets, battle)])
         if recovered > datetime.now():
             logger.info('Delay current task to prevent emotion control in the future')
-            self.config.task_delay(target=recovered)
+            self.config.task_delay(minute=60)
             raise ScriptEnd('Emotion control')
 
     def wait(self, fleet_index):
