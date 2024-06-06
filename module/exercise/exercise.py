@@ -1,5 +1,5 @@
-from datetime import timedelta
-from module.config.utils import get_server_last_update
+from datetime import timedelta, datetime
+from module.config.utils import get_server_last_update, get_server_next_update
 from module.exercise.assets import *
 from module.exercise.combat import ExerciseCombat
 from module.logger import logger
@@ -213,6 +213,8 @@ class Exercise(ExerciseCombat):
             remain_time = OCR_PERIOD_REMAIN.ocr(self.device.image)
         logger.info(f'Exercise period remain: {remain_time}')
 
+        delay = False
+
         if admiral_interval is not None and remain_time:
             admiral_start, admiral_end = admiral_interval
 
@@ -224,6 +226,17 @@ class Exercise(ExerciseCombat):
                 self.preserve = 0
             else:
                 logger.info(f'Preserve {self.preserve} exercise')
+                delay = True
+
+        next_update = get_server_next_update(self.config.Scheduler_ServerUpdate)
+        if delay and next_update - timedelta(hours=4) <= datetime.now():
+            delay = False
+
+        if delay:
+            with self.config.multi_set():
+                self.config.set_record(Exercise_OpponentRefreshValue=self.opponent_change_count)
+                self.config.task_delay(target=next_update-timedelta(hours=3))
+            return
 
         while 1:
             self.remain = OCR_EXERCISE_REMAIN.ocr(self.device.image)
