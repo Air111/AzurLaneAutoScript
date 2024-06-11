@@ -11,6 +11,7 @@ from module.base.decorator import del_cached_property
 from module.config.config import AzurLaneConfig, TaskEnd
 from module.config.deep import deep_get, deep_set
 from module.exception import *
+from module.gg_handler.gg_handler import GGHandler
 from module.logger import logger
 from module.notify import handle_notify
 
@@ -108,7 +109,11 @@ class AzurLaneAutoScript:
                     title=f"Alas <{self.config_name}> crashed",
                     content=f"<{self.config_name}> GamePageUnknownError",
                 )
-                exit(1)
+                logger.info('Restart to reset Game page in 10 seconds')
+                self.device.sleep(10)
+                from module.handler.login import LoginHandler
+                LoginHandler(self.config, self.device).app_restart()
+                return False
             else:
                 self.checker.wait_until_available()
                 return False
@@ -517,9 +522,24 @@ class AzurLaneAutoScript:
         AzurLaneConfig.is_hoarding_task = False
         return task.command
 
+    def gg_check(self):
+        if deep_get(self.config.data, "GameManager.GGHandler.Enabled"):
+            logger.info("GG is enabled, check gg package name")
+            if deep_get(self.config.data, "GameManager.GGHandler.GGPackageName") in self.device.list_package():
+                logger.info("GG package name exists")
+            else:
+                logger.critical("GG package name doesn't exist, please check your gg setting")
+                logger.critical("友情翻译：你他妈的GG包名填错了，滚去重填！！！")
+                exit(1)
+
     def loop(self):
+        self.gg_check()
         logger.set_file_logger(self.config_name)
         logger.info(f'Start scheduler loop: {self.config_name}')
+
+        # self.checker.wait_until_available()
+        # GGHandler(config=self.config, device=self.device).handle_restart_before_tasks()
+        check_fail = 0
 
         while 1:
             # Check update event from GUI
@@ -544,11 +564,26 @@ class AzurLaneAutoScript:
             _ = self.device
             self.device.config = self.config
             # Skip first restart
-            if self.is_first_task and task == 'Restart':
-                logger.info('Skip task `Restart` at scheduler start')
-                self.config.task_delay(server_update=True)
-                del_cached_property(self, 'config')
-                continue
+            if task != 'Restart':
+                try:
+                    gg_handler = GGHandler(config=self.config, device=self.device)
+                    gg_handler.check_config()
+                    gg_handler.check_then_set_gg_status(inflection.underscore(task))
+                except GameStuckError:
+                    del_cached_property(self, 'config')
+                    check_fail += 1
+                    if check_fail <= 3:
+                        continue
+                    else:
+                        logger.critical('GGHandler before task failed')
+                        handle_notify(
+                            self.config.Error_OnePushConfig,
+                            title=f"Alas <{self.config_name}> crashed",
+                            content=f"<{self.config_name}> RequestHumanTakeover\nGGHandler before task failed",
+                        )
+                        exit(1)
+                else:
+                    check_fail = 0
 
             # Run
             logger.info(f'Scheduler: Start task `{task}`')
@@ -556,6 +591,8 @@ class AzurLaneAutoScript:
             self.device.click_record_clear()
             logger.hr(task, level=0)
             success = self.run(inflection.underscore(task))
+            if task == 'Restart':
+                self.config.task_delay(server_update=True)
             logger.info(f'Scheduler: End task `{task}`')
             self.is_first_task = False
 

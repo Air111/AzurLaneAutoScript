@@ -16,14 +16,13 @@ class ManualConfig:
     > ShopFrequent > ShopOnce > Shipyard > Freebies
     > OpsiExplore
     > OpsiDaily > OpsiAshBeacon 
-    > Exercise > Reward
-    > Guild
+    > Exercise > OpsiAshAssist > Guild > Reward
     > Daily > Hard > Minigame > Awaken
     > Sos > EventSp > EventA > EventB > EventC > EventD
     > RaidDaily > CoalitionSp > WarArchives > MaritimeEscort
     > OpsiShop > OpsiVoucher
     > OpsiAbyssal > OpsiStronghold > OpsiObscure > OpsiArchive
-    > OpsiAshAssist > OpsiMonthBoss
+    > OpsiMonthBoss
     > Main > Main2 > Main3
     > Event > Event2 > Raid > Hospital > Coalition
     > OpsiMeowfficerFarming
@@ -39,14 +38,13 @@ class ManualConfig:
     > ShopFrequent > ShopOnce > Shipyard > Freebies
     > OpsiExplore
     > OpsiDaily > OpsiAshBeacon 
-    > Exercise > Reward
-    > Guild
+    > Exercise > OpsiAshAssist > Guild > Reward
     > Daily > Hard > Minigame > Awaken
     > Sos > EventSp > EventA > EventB > EventC > EventD
     > RaidDaily > CoalitionSp > WarArchives > MaritimeEscort
     > OpsiShop > OpsiVoucher
     > OpsiAbyssal > OpsiStronghold > OpsiObscure > OpsiArchive
-    > OpsiAshAssist > OpsiMonthBoss
+    > OpsiMonthBoss
     > GemsFarming
     > Main > Main2 > Main3
     > Event > Event2 > Raid > Hospital > Coalition

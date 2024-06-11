@@ -8,6 +8,7 @@ config/*.yaml
 config/*.json
 config/tmp*
 !config/template*.json
+config/gg_handler/*.tmp
 *.pyw
 dev_tools/debug_tools
 .idea
