@@ -9,13 +9,14 @@ from module.combat.hp_balancer import HPBalancer
 from module.combat.level import Level
 from module.combat.submarine import SubmarineCall
 from module.combat_ui.assets import *
+from module.exception import CombatFail
 from module.handler.auto_search import AutoSearchHandler
 from module.logger import logger
-from module.map.assets import MAP_OFFENSIVE
+from module.map.assets import MAP_OFFENSIVE, WITHDRAW, FLEET_PREPARATION, MAP_PREPARATION
 from module.retire.retirement import Retirement
 from module.statistics.azurstats import DropImage
 from module.template.assets import TEMPLATE_COMBAT_LOADING
-from module.ui.assets import BACK_ARROW, EXERCISE_CHECK, MUNITIONS_CHECK
+from module.ui.assets import BACK_ARROW, EXERCISE_CHECK, MUNITIONS_CHECK, DAILY_CHECK
 
 
 class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatManual, AutoSearchHandler):
@@ -434,6 +435,47 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
         if self.appear_then_click(EXP_INFO_B):
             self.device.sleep((0.25, 0.5))
             return True
+        if self.appear_then_click(EXP_INFO_D):
+            logger.warning('Exp Info D')
+            self.device.sleep((0.25, 0.5))
+            return True
+
+        return False
+
+    def handle_opts_info(self):
+        if self.appear_then_click(OPTS_INFO_D, offset=(20, 20)):
+            self.emotion.reduce(1, 10)
+            self.emotion.reduce(2, 10)
+            self.device.screenshot_interval_set()
+            while 1:
+                self.device.screenshot()
+                if self.handle_urgent_commission():
+                    continue
+                if self.handle_popup_confirm('WITHDRAW'):
+                    continue
+                if self.appear_then_click(WITHDRAW, interval=5):
+                    continue
+                # Accidental clicks
+                if self.appear(DAILY_CHECK, offset=(20, 20), interval=3):
+                    logger.info(f'{DAILY_CHECK} -> {BACK_ARROW}')
+                    self.device.click(BACK_ARROW)
+                    continue
+                if self.is_in_stage():
+                    break
+                if self.is_in_auto_search_menu() or self._handle_auto_search_menu_missing():
+                    break
+                if self.handle_story_skip():
+                    continue
+                if self.appear(FLEET_PREPARATION, offset=(20, 50), interval=2) \
+                        or self.appear(MAP_PREPARATION, offset=(20, 20), interval=2):
+                    self.enter_map_cancel()
+                    break
+                if self.appear(BATTLE_PREPARATION, offset=(20, 20), interval=2):
+                    self.device.click(BACK_ARROW)
+                    continue
+
+            self.ui_goto_main()
+            raise CombatFail
 
         return False
 
@@ -528,6 +570,8 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
                 if not exp_info and self.handle_battle_status(drop=drop):
                     battle_status = True
                     continue
+            if exp_info and self.handle_opts_info():
+                continue
             if self.handle_urgent_commission(drop=drop):
                 continue
             if self.handle_guild_popup_cancel():
