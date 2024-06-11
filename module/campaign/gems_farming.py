@@ -38,65 +38,35 @@ class GemsFleetEmotion(FleetEmotion):
         if self.current < 119:
             super().update()
 
-    def get_recovered(self, expected_reduce=0):
-        recover_count = (self.limit + expected_reduce - self.current + 1) // 2
-        recovered = (int(datetime.now().timestamp()) // 360 + recover_count) * 360
-        return datetime.fromtimestamp(recovered)
-
-    def reset(self, emotion):
-        self.current = emotion
-        self.config.set_record(**{self.value_name: emotion})
-
 
 class GemsEmotion(Emotion):
 
-    def __init__(self, config, fleet_index):
+    def __init__(self, config):
         self.config = config
-        self.fleet_index = fleet_index - 1
         self.fleet_1 = GemsFleetEmotion(self.config, fleet=1)
         self.fleet_2 = GemsFleetEmotion(self.config, fleet=2)
         self.fleets = [self.fleet_1, self.fleet_2]
-
-    def update(self):
-        self.fleets[self.fleet_index].update()
-
-    def record(self):
-        fleet = self.fleets[self.fleet_index]
-        self.config.set_record(**{fleet.value_name: fleet.current})
-
-    def show(self):
-        fleet = self.fleets[self.fleet_index]
-        logger.attr(f'Emotion fleet_{fleet.fleet}', fleet.value)
 
     def check_reduce(self, battle):
         if not self.is_calculate:
             return
 
-        emotion_reduce = battle * self.reduce_per_battle_before_entering
-        logger.info(f'Expect emotion reduce: {emotion_reduce}')
+        if self.config.Fleet_FleetOrder == 'fleet1_standby_fleet2_all':
+            battle = (0, battle * self.reduce_per_battle_before_entering)
+        else:
+            battle = (battle * self.reduce_per_battle_before_entering, 0)
+
+        logger.info(f'Expect emotion reduce: {battle}')
         self.update()
         self.record()
         self.show()
-        recovered = self.fleets[self.fleet_index].get_recovered(emotion_reduce)
+        recovered = max([f.get_recovered(b) for f, b in zip(self.fleets, battle)])
         if recovered > datetime.now():
             logger.hr('EMOTION CONTROL')
             raise CampaignEnd('Emotion control')
 
     def wait(self, fleet_index):
         pass
-
-    def reduce(self, fleet_index):
-        logger.hr('Emotion reduce')
-        if fleet_index - 1 != self.fleet_index:
-            logger.warning('Fleet index does not match')
-
-        self.update()
-        self.fleets[self.fleet_index].current -= self.reduce_per_battle
-        self.record()
-        self.show()
-
-    def reset(self, emotion):
-        self.fleets[self.fleet_index].reset(emotion)
 
 
 class GemsCampaignOverride(CampaignBase):
@@ -182,10 +152,7 @@ class GemsCampaignOverride(CampaignBase):
 
     @cached_property
     def emotion(self) -> GemsEmotion:
-        fleet_index = 1
-        if self.config.Fleet_FleetOrder == 'fleet1_standby_fleet2_all':
-            fleet_index = 2
-        return GemsEmotion(self.config, fleet_index)
+        return GemsEmotion(config=self.config)
 
 
 class GemsFarming(CampaignRun, FleetEquipment, Dock):
@@ -225,6 +192,12 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
             return self.config.Fleet_Fleet2
         else:
             return self.config.Fleet_Fleet1
+
+    def set_emotion(self, emotion):
+        if self.config.Fleet_FleetOrder == 'fleet1_standby_fleet2_all':
+            self.campaign.config.set_record(Emotion_Fleet2Value=emotion)
+        else:
+            self.campaign.config.set_record(Emotion_Fleet1Value=emotion)
 
     def flagship_change(self):
         """
@@ -551,8 +524,8 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
                 success = self.vanguard_change()
                 if self.change_flagship:
                     success = success and self.flagship_change()
-                if success:
-                    self.campaign.emotion.reset(self._new_emotion_value)
+                if success and (self.change_flagship or self.change_vanguard):
+                    self.set_emotion(self._new_emotion_value)
 
                 self._trigger_lv32 = False
                 self._trigger_emotion = False
