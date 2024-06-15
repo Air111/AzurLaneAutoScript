@@ -95,7 +95,7 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
         self.hp_get()
         self.lv_reset()
         self.lv_get()
-        self.ensure_edge_insight(preset=self.map.in_map_swipe_preset_data, swipe_limit=(6, 5))
+        self.ensure_edge_insight(preset=self.map.in_map_swipe_preset_data, swipe_limit=(4, 3))
         # self.full_scan(must_scan=self.map.camera_data_spawn_point)
         # self.find_current_fleet()
         # self.find_path_initial()
