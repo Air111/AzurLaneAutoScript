@@ -5,6 +5,7 @@ from module.campaign.campaign_base import CampaignBase
 from module.campaign.run import CampaignRun
 from module.combat.assets import BATTLE_PREPARATION
 from module.combat.emotion import Emotion, FleetEmotion
+from module.config.utils import get_server_next_update
 from module.equipment.assets import *
 from module.equipment.fleet_equipment import FleetEquipment
 from module.exception import CampaignEnd, ScriptError
@@ -468,6 +469,12 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
             mode (str): `normal` or `hard`
             total (int):
         """
+        now = datetime.now().replace(microsecond=0)
+        target = get_server_next_update('05:00')
+        if now.time() < target.time():
+            self.config.task_delay(target=target)
+            self.config.task_stop()
+
         self.config.STOP_IF_REACH_LV32 = self.change_flagship
 
         while 1:
