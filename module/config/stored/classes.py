@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from module.base.decorator import cached_property
 from module.config.deep import deep_get
@@ -156,11 +156,30 @@ class StoredCounter(StoredBase):
         return stored
 
 
-class StoredOil(StoredCounter):
+class StoredLimitedCounter(StoredCounter):
+    _min_time_delta = timedelta(minutes=10)
+
+    def __setattr__(self, key, value):
+        if key in self._attrs:
+            last_update = self._config.cross_get(keys=self._key, default={}).get('time', '2020-01-01 00:00:00')
+            if isinstance(last_update, str):
+                try:
+                    last_update = datetime.fromisoformat(last_update)
+                except ValueError:
+                    pass
+            try:
+                if last_update + self._min_time_delta > now():
+                    return
+            except TypeError:
+                pass
+        super().__setattr__(key, value)
+
+
+class StoredOil(StoredLimitedCounter):
     pass
 
 
-class StoredCoin(StoredCounter):
+class StoredCoin(StoredLimitedCounter):
     pass
 
 

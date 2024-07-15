@@ -4,6 +4,7 @@ from module.config.stored.classes import (
     StoredCoin,
     StoredCounter,
     StoredInt,
+    StoredLimitedCounter,
     StoredOil,
     StoredStr,
 )
