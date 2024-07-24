@@ -9,7 +9,6 @@ from module.retire.assets import *
 from module.retire.enhancement import Enhancement
 from module.retire.scanner import ShipScanner
 from module.retire.setting import QuickRetireSettingHandler
-from module.ui.scroll import Scroll
 
 CARD_GRIDS = ButtonGrid(
     origin=(93, 76), delta=(164 + 2 / 3, 227), button_shape=(138, 204), grid_shape=(7, 2), name='CARD')
@@ -23,9 +22,6 @@ CARD_RARITY_COLORS = {
     'SSR': (248, 223, 107)
     # Not support marriage cards.
 }
-
-RETIRE_CONFIRM_SCROLL = Scroll(RETIRE_CONFIRM_SCROLL_AREA, color=(74, 77, 110), name='STRATEGIC_SEARCH_SCROLL')
-RETIRE_CONFIRM_SCROLL.color_threshold = 240  # Background color is (66, 72, 77), so default (256-221)=35 is not enough to dintinguish.
 
 
 class Retirement(Enhancement, QuickRetireSettingHandler):
@@ -522,29 +518,13 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
 
             return None
 
-    def retirement_get_common_rarity_cv(self, skip_first_screenshot=False):
-        button = self.retirement_get_common_rarity_cv_in_page()
-        if button is not None:
-            return button
-
-        while RETIRE_CONFIRM_SCROLL.appear(main=self):
-            RETIRE_CONFIRM_SCROLL.next_page(main=self)
-            button = self.retirement_get_common_rarity_cv_in_page()
-            if button is not None:
-                return button
-            if RETIRE_CONFIRM_SCROLL.at_bottom(main=self):
-                logger.info('Scroll bar reached end, stop')
-                break
-
-        return button
-
     def keep_one_common_cv(self):
         """
         Returns:
 
         """
         logger.info('Keep one common CV')
-        button = self.retirement_get_common_rarity_cv()
+        button = self.retirement_get_common_rarity_cv_in_page()
         if button is not None:
             self._retire_select_one(button)
             self._have_kept_cv = True
