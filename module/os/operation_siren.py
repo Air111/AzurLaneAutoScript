@@ -437,7 +437,7 @@ class OperationSiren(OSMap):
             if self.config.OpsiHazard1Leveling_TargetZone != 0:
                 zone = self.config.OpsiHazard1Leveling_TargetZone
             else:
-                zone = 22
+                zone = 22 if datetime.now().second % 2 == 0 else 44
             logger.hr(f'OS hazard 1 leveling, zone_id={zone}', level=1)
             if self.zone.zone_id != zone or not self.is_zone_name_hidden:
                 self.globe_goto(self.name_to_zone(zone), types='SAFE', refresh=True)
