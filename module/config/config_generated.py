@@ -155,6 +155,8 @@ class GeneratedConfig:
     GemsFarming_ChangeVanguard = 'ship'  # disabled, ship, ship_equip
     GemsFarming_CommonDD = 'any'  # any, favourite, aulick_or_foote, cassin_or_downes, z20_or_z21
     GemsFarming_DelayUntil = datetime.datetime(2020, 1, 1, 5, 0)
+    GemsFarming_HardVanguardIndex = 0  # 0, 1, 2
+    GemsFarming_HardFlagshipIndex = 0  # 0, 1, 2
 
     # Group `CampaignStorage`
     CampaignStorage_Oil = {}

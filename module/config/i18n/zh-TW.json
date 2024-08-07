@@ -1202,6 +1202,20 @@
     "DelayUntil": {
       "name": "GemsFarming.DelayUntil.name",
       "help": "GemsFarming.DelayUntil.help"
+    },
+    "HardVanguardIndex": {
+      "name": "GemsFarming.HardVanguardIndex.name",
+      "help": "GemsFarming.HardVanguardIndex.help",
+      "0": "0",
+      "1": "1",
+      "2": "2"
+    },
+    "HardFlagshipIndex": {
+      "name": "GemsFarming.HardFlagshipIndex.name",
+      "help": "GemsFarming.HardFlagshipIndex.help",
+      "0": "0",
+      "1": "1",
+      "2": "2"
     }
   },
   "CampaignStorage": {

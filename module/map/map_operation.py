@@ -139,7 +139,7 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
                     logger.critical("Possible reason #2: "
                                     "This stage can only be farmed once a day, "
                                     "but it's the second time that you are entering")
-                    raise RequestHumanTakeover
+                    raise self.hard_not_satisfied
 
                 # Already in map
                 if not checked_in_map and self.is_in_map():

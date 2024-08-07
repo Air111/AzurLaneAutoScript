@@ -53,7 +53,6 @@ GemsFarming:
       option_bold: [ sub_standby, ]
     DistanceToBoss: '2_grid_to_boss'
   Emotion:
-    Mode: calculate
     Fleet1Control: prevent_red_face
     Fleet1Recover: not_in_dormitory
     Fleet1Oath: false

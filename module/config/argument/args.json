@@ -1636,6 +1636,24 @@
         "type": "datetime",
         "value": "2020-01-01 05:00:00",
         "validate": "datetime"
+      },
+      "HardVanguardIndex": {
+        "type": "select",
+        "value": 0,
+        "option": [
+          0,
+          1,
+          2
+        ]
+      },
+      "HardFlagshipIndex": {
+        "type": "select",
+        "value": 0,
+        "option": [
+          0,
+          1,
+          2
+        ]
       }
     },
     "Campaign": {
@@ -1949,8 +1967,7 @@
           "calculate",
           "ignore",
           "calculate_ignore"
-        ],
-        "display": "hide"
+        ]
       },
       "Fleet1Value": {
         "type": "input",
