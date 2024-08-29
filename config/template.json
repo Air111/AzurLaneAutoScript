@@ -315,6 +315,7 @@
       "CommonCV": "any",
       "ChangeVanguard": "ship",
       "CommonDD": "any",
+      "EquipmentCode": "CV: null",
       "DelayUntil": "2020-01-01 05:00:00"
     },
     "Campaign": {
