@@ -25,7 +25,7 @@ from module.ui.assets import BACK_ARROW
 from module.ui.page import page_fleet
 
 SIM_VALUE = 0.92
-EMOTION_LIMIT = 10
+EMOTION_LIMIT = 4
 
 
 class GemsFleetEmotion(FleetEmotion):
@@ -158,10 +158,14 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
             return self.config.Fleet_Fleet1
 
     def set_emotion(self, emotion):
-        if self.config.Fleet_FleetOrder == 'fleet1_standby_fleet2_all':
-            self.campaign.config.set_record(Emotion_Fleet2Value=emotion)
+        if hasattr(self, 'campaign'):
+            config = self.campaign.config
         else:
-            self.campaign.config.set_record(Emotion_Fleet1Value=emotion)
+            config = self.config
+        if config.Fleet_FleetOrder == 'fleet1_standby_fleet2_all':
+            config.set_record(Emotion_Fleet2Value=emotion)
+        else:
+            config.set_record(Emotion_Fleet1Value=emotion)
 
     def flagship_change(self):
         """
@@ -469,8 +473,20 @@ class GemsFarming(CampaignRun, FleetEquipment, Dock):
             mode (str): `normal` or `hard`
             total (int):
         """
+
+        if self.config.GemsFarming_CorrectEmotion:
+            with self.config.multi_set():
+                self.config.GemsFarming_CorrectEmotion = False
+                self.set_emotion(0)
+
         now = datetime.now().replace(microsecond=0)
-        target = get_server_next_update('05:00')
+        try:
+            target = self.config.GemsFarming_DelayUntil.strftime("%H:%M")
+            target = get_server_next_update(target)
+        except Exception as e:
+            logger.warning(e)
+            logger.warning('Delay until 05:00')
+            target = get_server_next_update('05:00')
         if now.time() < target.time():
             self.config.task_delay(target=target)
             self.config.task_stop()

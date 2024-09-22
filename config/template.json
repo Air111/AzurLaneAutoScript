@@ -309,11 +309,13 @@
       "ServerUpdate": "00:00"
     },
     "GemsFarming": {
+      "CommissionLimit": true,
+      "CorrectEmotion": false,
       "ChangeFlagship": "ship",
       "CommonCV": "any",
       "ChangeVanguard": "ship",
       "CommonDD": "any",
-      "CommissionLimit": true
+      "DelayUntil": "2020-01-01 05:00:00"
     },
     "Campaign": {
       "Name": "12-4",

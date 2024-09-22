@@ -148,11 +148,13 @@ class GeneratedConfig:
     C124LargeLeveling_PickupAmmo = 3  # 3, 4, 5
 
     # Group `GemsFarming`
+    GemsFarming_CommissionLimit = True
+    GemsFarming_CorrectEmotion = False
     GemsFarming_ChangeFlagship = 'ship'  # ship, ship_equip
     GemsFarming_CommonCV = 'any'  # any, langley, bogue, ranger, hermes
     GemsFarming_ChangeVanguard = 'ship'  # disabled, ship, ship_equip
     GemsFarming_CommonDD = 'any'  # any, favourite, aulick_or_foote, cassin_or_downes, z20_or_z21
-    GemsFarming_CommissionLimit = True
+    GemsFarming_DelayUntil = datetime.datetime(2020, 1, 1, 5, 0)
 
     # Group `CampaignStorage`
     CampaignStorage_Oil = {}

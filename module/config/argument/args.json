@@ -1585,6 +1585,14 @@
       }
     },
     "GemsFarming": {
+      "CommissionLimit": {
+        "type": "checkbox",
+        "value": true
+      },
+      "CorrectEmotion": {
+        "type": "checkbox",
+        "value": false
+      },
       "ChangeFlagship": {
         "type": "select",
         "value": "ship",
@@ -1624,9 +1632,10 @@
           "z20_or_z21"
         ]
       },
-      "CommissionLimit": {
-        "type": "checkbox",
-        "value": true
+      "DelayUntil": {
+        "type": "datetime",
+        "value": "2020-01-01 05:00:00",
+        "validate": "datetime"
       }
     },
     "Campaign": {

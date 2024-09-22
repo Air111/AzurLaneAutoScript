@@ -1160,6 +1160,14 @@
       "name": "GemsFarming._info.name",
       "help": "GemsFarming._info.help"
     },
+    "CommissionLimit": {
+      "name": "GemsFarming.CommissionLimit.name",
+      "help": "GemsFarming.CommissionLimit.help"
+    },
+    "CorrectEmotion": {
+      "name": "GemsFarming.CorrectEmotion.name",
+      "help": "GemsFarming.CorrectEmotion.help"
+    },
     "ChangeFlagship": {
       "name": "GemsFarming.ChangeFlagship.name",
       "help": "GemsFarming.ChangeFlagship.help",
@@ -1191,9 +1199,9 @@
       "cassin_or_downes": "GemsFarming.CommonDD.cassin_or_downes",
       "z20_or_z21": "GemsFarming.CommonDD.z20_or_z21"
     },
-    "CommissionLimit": {
-      "name": "GemsFarming.CommissionLimit.name",
-      "help": "GemsFarming.CommissionLimit.help"
+    "DelayUntil": {
+      "name": "GemsFarming.DelayUntil.name",
+      "help": "GemsFarming.DelayUntil.help"
     }
   },
   "CampaignStorage": {
