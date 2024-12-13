@@ -523,47 +523,21 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
             return None
 
     def retirement_get_common_rarity_cv(self, skip_first_screenshot=False):
-        """
-        Args:
-            skip_first_screenshot:
+        button = self.retirement_get_common_rarity_cv_in_page()
+        if button is not None:
+            return button
 
-        Returns:
-            Button: Button to click to remove ship from retire list
-        """
-        swipe_count = 0
-        disappear_confirm = Timer(2, count=6)
-        while 1:
-            if skip_first_screenshot:
-                skip_first_screenshot = False
-            else:
-                self.device.screenshot()
-
-            # Try to get CV
+        for _ in range(7):
+            if not RETIRE_CONFIRM_SCROLL.appear(main=self):
+                logger.info('Scroll bar disappeared, stop')
+                break
+            RETIRE_CONFIRM_SCROLL.next_page(main=self)
             button = self.retirement_get_common_rarity_cv_in_page()
             if button is not None:
                 return button
-
-            # Wait scroll bar
-            if RETIRE_CONFIRM_SCROLL.appear(main=self):
-                disappear_confirm.clear()
-            else:
-                disappear_confirm.start()
-                if disappear_confirm.reached():
-                    logger.warning('Scroll bar disappeared, stop')
-                    break
-                else:
-                    continue
-
             if RETIRE_CONFIRM_SCROLL.at_bottom(main=self):
                 logger.info('Scroll bar reached end, stop')
                 break
-
-            # Swipe next page
-            if swipe_count >= 7:
-                logger.info('Reached maximum swipes to find common CV')
-                break
-            RETIRE_CONFIRM_SCROLL.next_page(main=self)
-            swipe_count += 1
 
         return button
 
