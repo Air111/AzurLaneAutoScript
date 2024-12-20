@@ -7,7 +7,6 @@ from module.combat.assets import BATTLE_PREPARATION
 from module.combat.emotion import Emotion, FleetEmotion
 from module.config.utils import get_server_next_update
 from module.equipment.assets import *
-from module.equipment.equipment_code import EquipmentCodeHandler
 from module.equipment.fleet_equipment import FleetEquipment
 from module.exception import CampaignEnd, ScriptError
 from module.handler.assets import AUTO_SEARCH_MAP_OPTION_OFF
@@ -120,19 +119,7 @@ class GemsCampaignOverride(CampaignBase):
         return GemsEmotion(config=self.config)
 
 
-class GemsEquipmentHandler(EquipmentCodeHandler):
-    def __init__(self, config, device=None, task=None):
-        super().__init__(config=config,
-                         device=device,
-                         task=task,
-                         key="GemsFarming.GemsFarming.EquipmentCode",
-                         ships=['CV'])
-
-    def current_ship(self, skip_first_screenshot=True):
-        return 'CV'
-
-
-class GemsFarming(CampaignRun, Dock, FleetEquipment, GemsEquipmentHandler):
+class GemsFarming(CampaignRun, FleetEquipment, Dock):
 
     def load_campaign(self, name, folder='campaign_main'):
         super().load_campaign(name, folder)
@@ -182,28 +169,35 @@ class GemsFarming(CampaignRun, Dock, FleetEquipment, GemsEquipmentHandler):
 
     def flagship_change(self):
         """
-        Change flagship and flagship's equipment using gear code
+        Change flagship and flagship's equipment
+        If config.GemsFarming_CommonCV == 'any', only change auxiliary equipment
 
         Returns:
             bool: True if flagship changed.
         """
 
+        if self.config.GemsFarming_CommonCV == 'any':
+            index_list = range(3, 5)
+        else:
+            index_list = range(0, 5)
         logger.hr('Change flagship', level=1)
         logger.attr('ChangeFlagship', self.config.GemsFarming_ChangeFlagship)
         self.fleet_enter(self.fleet_to_attack)
         if self.change_flagship_equip:
-            logger.hr('Unmount flagship equipments', level=2)
+            logger.hr('Record flagship equipment', level=2)
             self.fleet_enter_ship(FLEET_DETAIL_ENTER_FLAGSHIP)
-            self.clear_all_equip()
+            self.ship_equipment_record_image(index_list=index_list)
+            self.ship_equipment_take_off()
             self.fleet_back()
 
         logger.hr('Change flagship', level=2)
         success = self.flagship_change_execute()
 
         if self.change_flagship_equip:
-            logger.hr('Mount flagship equipments', level=2)
+            logger.hr('Equip flagship equipment', level=2)
             self.fleet_enter_ship(FLEET_DETAIL_ENTER_FLAGSHIP)
-            self.apply_equip_code()
+            self.ship_equipment_take_off()
+            self.ship_equipment_take_on_image(index_list=index_list)
             self.fleet_back()
 
         return success

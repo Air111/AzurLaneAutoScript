@@ -1632,11 +1632,6 @@
           "z20_or_z21"
         ]
       },
-      "EquipmentCode": {
-        "type": "textarea",
-        "value": "CV: null",
-        "mode": "yaml"
-      },
       "DelayUntil": {
         "type": "datetime",
         "value": "2020-01-01 05:00:00",
