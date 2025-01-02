@@ -44,7 +44,10 @@ class CampaignRun(CampaignEvent):
         if folder.startswith('campaign_'):
             self.stage = '-'.join(name.split('_')[1:3])
         if folder.startswith('event') or folder.startswith('war_archives'):
-            self.stage = name
+            if folder == 'event_20221222_cn' and name == 'd3_blueprint_farming':
+                self.stage = 'd3'
+            else:
+                self.stage = name
 
         try:
             self.module = importlib.import_module('.' + name, f'campaign.{folder}')
@@ -162,6 +165,9 @@ class CampaignRun(CampaignEvent):
         Returns:
             str, str: name, folder
         """
+        if folder == 'event_20221222_cn' and name == 'd3_blueprint_farming':
+            return name, folder
+
         name = to_map_file_name(name)
         # For GemsFarming, auto choose events or main chapters
         if self.config.task.command == 'GemsFarming':

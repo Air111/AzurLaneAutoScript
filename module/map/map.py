@@ -453,7 +453,7 @@ class Map(Fleet):
         if not self.config.MAP_HAS_SIREN and not self.config.MAP_HAS_FORTRESS:
             return False
 
-        if self.config.FLEET_2:
+        if self.config.FLEET_2 and 'sort' not in kwargs:
             kwargs['sort'] = ('weight', 'cost_2')
         grids = self.map.select(is_siren=True)
         if self.config.MAP_HAS_FORTRESS:
