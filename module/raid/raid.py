@@ -251,6 +251,9 @@ class Raid(MapOperation, RaidCombat, CampaignEvent):
                     self.emotion.reduce(fleet_index)
                 break
 
+    def handle_combat_low_emotion(self):
+        return self.handle_popup_confirm('IGNORE_LOW_EMOTION')
+
     def handle_raid_ticket_use(self):
         """
         Returns:
