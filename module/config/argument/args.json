@@ -9549,9 +9549,13 @@
           22
         ]
       },
+      "YellowCoinsPreserve": {
+        "type": "input",
+        "value": 20000
+      },
       "SolveScanningDevice": {
         "type": "checkbox",
-        "value": false
+        "value": true
       }
     },
     "OpsiFleet": {

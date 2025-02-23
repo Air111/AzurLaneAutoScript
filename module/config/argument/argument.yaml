@@ -751,7 +751,8 @@ OpsiHazard1Leveling:
   TargetZone:
     value: 0
     option: [ 0, 44, 22 ]
-  SolveScanningDevice: false
+  YellowCoinsPreserve: 20000
+  SolveScanningDevice: true
 OpsiStorage:
   YellowCoin:
     stored: StoredInt

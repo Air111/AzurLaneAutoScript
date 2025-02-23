@@ -440,7 +440,8 @@ class GeneratedConfig:
 
     # Group `OpsiHazard1Leveling`
     OpsiHazard1Leveling_TargetZone = 0  # 0, 44, 22
-    OpsiHazard1Leveling_SolveScanningDevice = False
+    OpsiHazard1Leveling_YellowCoinsPreserve = 20000
+    OpsiHazard1Leveling_SolveScanningDevice = True
 
     # Group `OpsiStorage`
     OpsiStorage_YellowCoin = {}

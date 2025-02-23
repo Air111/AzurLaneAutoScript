@@ -2529,6 +2529,10 @@
       "44": "44 | 西大陸棚D",
       "22": "22 | NA海域西南B"
     },
+    "YellowCoinsPreserve": {
+      "name": "OpsiHazard1Leveling.YellowCoinsPreserve.name",
+      "help": "OpsiHazard1Leveling.YellowCoinsPreserve.help"
+    },
     "SolveScanningDevice": {
       "name": "OpsiHazard1Leveling.SolveScanningDevice.name",
       "help": "OpsiHazard1Leveling.SolveScanningDevice.help"

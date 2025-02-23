@@ -2529,6 +2529,10 @@
       "44": "44",
       "22": "22"
     },
+    "YellowCoinsPreserve": {
+      "name": "OpsiHazard1Leveling.YellowCoinsPreserve.name",
+      "help": "OpsiHazard1Leveling.YellowCoinsPreserve.help"
+    },
     "SolveScanningDevice": {
       "name": "OpsiHazard1Leveling.SolveScanningDevice.name",
       "help": "OpsiHazard1Leveling.SolveScanningDevice.help"

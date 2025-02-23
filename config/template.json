@@ -1901,7 +1901,8 @@
     },
     "OpsiHazard1Leveling": {
       "TargetZone": 0,
-      "SolveScanningDevice": false
+      "YellowCoinsPreserve": 20000,
+      "SolveScanningDevice": true
     },
     "OpsiFleet": {
       "Fleet": 1,
