@@ -96,7 +96,7 @@ class ManualConfig:
     """
     module.campaign.gems_farming
     """
-    GEMS_EMOTION_TRIGGERED = False
+    GEMS_EMOTION_TRIGGRED = False
 
     """
     module.handler
