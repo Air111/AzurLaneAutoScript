@@ -1505,6 +1505,10 @@
       "name": "餵食",
       "help": ""
     },
+    "LazyFeed": {
+      "name": "Dorm.LazyFeed.name",
+      "help": "Dorm.LazyFeed.help"
+    },
     "FeedFilter": {
       "name": "餵食過濾器",
       "help": "一般不需要修改"

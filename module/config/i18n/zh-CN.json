@@ -1505,6 +1505,10 @@
       "name": "喂食",
       "help": ""
     },
+    "LazyFeed": {
+      "name": "一次只喂一个食物",
+      "help": ""
+    },
     "FeedFilter": {
       "name": "喂食过滤器",
       "help": "一般不需要修改"

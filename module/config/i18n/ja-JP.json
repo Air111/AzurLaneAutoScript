@@ -1505,6 +1505,10 @@
       "name": "Dorm.Feed.name",
       "help": "Dorm.Feed.help"
     },
+    "LazyFeed": {
+      "name": "Dorm.LazyFeed.name",
+      "help": "Dorm.LazyFeed.help"
+    },
     "FeedFilter": {
       "name": "Dorm.FeedFilter.name",
       "help": "Dorm.FeedFilter.help"
