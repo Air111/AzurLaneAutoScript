@@ -7300,7 +7300,7 @@
       },
       "ServerUpdate": {
         "type": "input",
-        "value": "00:00",
+        "value": "00:00, 06:00, 12:00, 18:00",
         "display": "hide"
       }
     },
@@ -7312,6 +7312,10 @@
       "Feed": {
         "type": "checkbox",
         "value": true
+      },
+      "LazyFeed": {
+        "type": "checkbox",
+        "value": false
       },
       "FeedFilter": {
         "type": "textarea",

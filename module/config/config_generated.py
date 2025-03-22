@@ -224,6 +224,7 @@ class GeneratedConfig:
     # Group `Dorm`
     Dorm_Collect = True
     Dorm_Feed = True
+    Dorm_LazyFeed = False
     Dorm_FeedFilter = '20000 > 10000 > 5000 > 3000 > 2000 > 1000'
 
     # Group `BuyFurniture`

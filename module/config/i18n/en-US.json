@@ -1505,6 +1505,10 @@
       "name": "Restock Dorm Snacks",
       "help": ""
     },
+    "LazyFeed": {
+      "name": "Dorm.LazyFeed.name",
+      "help": "Dorm.LazyFeed.help"
+    },
     "FeedFilter": {
       "name": "Snack Filter",
       "help": "Generally does not need to be modified or re-arranged but can do so if desired"

@@ -382,9 +382,13 @@ class RewardDorm(UI):
         for selected in FOOD_FILTER.apply(food):
             button = self._dorm_food.buttons[food.index(selected)]
             if selected.amount > 0 and fill > selected.feed:
-                count = min(fill // selected.feed, selected.amount)
-                self._dorm_feed_click(button=button, count=count)
-                return True
+                if self.config.Dorm_LazyFeed:
+                    self._dorm_feed_click(button=button, count=1)
+                    break
+                else:
+                    count = min(fill // selected.feed, selected.amount)
+                    self._dorm_feed_click(button=button, count=count)
+                    return True
 
         return False
 
@@ -596,7 +600,10 @@ class RewardDorm(UI):
                       buy_furniture=self.config.BuyFurniture_Enable)
 
         # Scheduler
-        ships = self.get_dorm_ship_amount()
-        delay = self.cal_dorm_delay(ships)
-        logger.info(f'Ships in dorm: {ships}, task to delay: {delay}')
-        self.config.task_delay(minute=delay)
+        if self.config.Dorm_LazyFeed:
+            self.config.task_delay(server_update=True)
+        else:
+            ships = self.get_dorm_ship_amount()
+            delay = self.cal_dorm_delay(ships)
+            logger.info(f'Ships in dorm: {ships}, task to delay: {delay}')
+            self.config.task_delay(minute=delay)
